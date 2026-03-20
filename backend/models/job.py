@@ -1,0 +1,32 @@
+from sqlalchemy import Column, String, Text, Numeric, Enum, DateTime, func
+from sqlalchemy.dialects.postgresql import UUID
+from core.database import Base
+import uuid
+import enum
+
+class JobStatus(str, enum.Enum):
+    draft = "draft"
+    published = "published"
+    closed = "closed"
+
+class PublishStatus(str, enum.Enum):
+    pending = "pending"
+    published = "published"
+    failed = "failed"
+
+class Job(Base):
+    __tablename__ = "jobs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    title = Column(String, index=True, nullable=False)
+    description = Column(Text, nullable=False)
+    requirements = Column(Text, nullable=False)
+    experience_level = Column(String, nullable=False)
+    location = Column(String, nullable=False)
+    salary_range = Column(String, nullable=True)
+    job_type = Column(String, nullable=False)
+    status = Column(Enum(JobStatus), default=JobStatus.draft, nullable=False)
+    linkedin_url = Column(String, nullable=True)
+    publish_status = Column(Enum(PublishStatus), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
