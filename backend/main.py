@@ -2,10 +2,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers.job import router as job_router
 import logging
+import asyncio
+from contextlib import asynccontextmanager
+from services.publisher_service import run_cron_publish_scheduler
 
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI(title="Job Management API", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Start the "cron" scheduler in the background
+    asyncio.create_task(run_cron_publish_scheduler())
+    yield
+
+app = FastAPI(title="Job Management API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,8 +1,8 @@
 from pydantic import BaseModel, ConfigDict, Field
 from uuid import UUID
 from datetime import datetime
-from typing import Optional
-from models.job import JobStatus, PublishStatus
+from typing import Optional, List
+from models.job import JobStatus, PublishStatus, PublishDestination
 
 class JobBase(BaseModel):
     title: str = Field(..., min_length=3, max_length=100)
@@ -15,6 +15,9 @@ class JobBase(BaseModel):
     status: JobStatus = JobStatus.draft
     linkedin_url: Optional[str] = None
     publish_status: Optional[PublishStatus] = None
+    publish_destination: Optional[PublishDestination] = Field(default=PublishDestination.feed, description="Feed is available now. Job page is an incoming feature.")
+    image_url: Optional[str] = None
+    tags: Optional[List[str]] = Field(default_factory=list)
 
 class JobCreate(JobBase):
     pass
@@ -30,9 +33,13 @@ class JobUpdate(BaseModel):
     status: Optional[JobStatus] = None
     linkedin_url: Optional[str] = None
     publish_status: Optional[PublishStatus] = None
+    publish_destination: Optional[PublishDestination] = None
+    image_url: Optional[str] = None
+    tags: Optional[List[str]] = None
 
 class JobResponse(JobBase):
     id: UUID
+    image_base64: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     

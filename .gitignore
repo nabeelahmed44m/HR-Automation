@@ -52,7 +52,10 @@ dist/
 .vscode/
 *.swp
 *.swo
+rules.md
 
 # Project specific
 backend/test_publish.py
 backend/linkedin_error_*.png
+
+rules.md

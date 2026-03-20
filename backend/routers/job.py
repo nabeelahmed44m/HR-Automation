@@ -6,7 +6,7 @@ from services.job import JobService
 from typing import List, Optional
 from uuid import UUID
 from fastapi import BackgroundTasks
-from publisher.publisher_service import publish_job_to_linkedin_background
+from services.publisher_service import publish_job_to_linkedin_background
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
 
@@ -14,8 +14,11 @@ def get_job_service(db: AsyncSession = Depends(get_db)) -> JobService:
     return JobService(db)
 
 @router.post("", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
-async def create_job(job: JobCreate, service: JobService = Depends(get_job_service)):
-    return await service.create_job(job)
+async def create_job(job: JobCreate, background_tasks: BackgroundTasks, service: JobService = Depends(get_job_service)):
+    created_job = await service.create_job(job)
+    # Trigger publish immediately
+    background_tasks.add_task(publish_job_to_linkedin_background, created_job.id)
+    return created_job
 
 @router.post("/{id}/publish/linkedin")
 async def publish_to_linkedin(id: UUID, background_tasks: BackgroundTasks):

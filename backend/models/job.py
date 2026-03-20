@@ -9,10 +9,7 @@ class JobStatus(str, enum.Enum):
     published = "published"
     closed = "closed"
 
-class PublishStatus(str, enum.Enum):
-    pending = "pending"
-    published = "published"
-    failed = "failed"
+from .publish import PublishStatus, PublishDestination
 
 class Job(Base):
     __tablename__ = "jobs"
@@ -28,5 +25,8 @@ class Job(Base):
     status = Column(Enum(JobStatus), default=JobStatus.draft, nullable=False)
     linkedin_url = Column(String, nullable=True)
     publish_status = Column(Enum(PublishStatus), nullable=True)
+    publish_destination = Column(Enum(PublishDestination), nullable=True, default=PublishDestination.feed)
+    image_base64 = Column(Text, nullable=True)
+    tags = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())

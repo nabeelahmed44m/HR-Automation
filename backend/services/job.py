@@ -16,7 +16,28 @@ class JobService:
 
     async def create_job(self, job: JobCreate) -> Job:
         try:
-            created_job = await self.repository.create(job.model_dump())
+            job_data = job.model_dump()
+            
+            # 1. Handle Image Fetching from URL
+            image_url = job_data.pop("image_url", None)
+            if image_url:
+                try:
+                    import httpx
+                    import base64
+                    async with httpx.AsyncClient() as client:
+                        response = await client.get(image_url)
+                        if response.status_code == 200:
+                            job_data["image_base64"] = base64.b64encode(response.content).decode("utf-8")
+                            logger.info(f"Successfully fetched image from {image_url}")
+                except Exception as img_err:
+                    logger.warning(f"Failed to fetch image from {image_url}: {str(img_err)}")
+
+            # 2. Handle Tags formatting
+            tags_list = job_data.pop("tags", [])
+            if tags_list:
+                job_data["tags"] = ",".join(tags_list)
+                
+            created_job = await self.repository.create(job_data)
             await self.session.commit()
             logger.info(f"Created job {created_job.id}")
             return created_job

@@ -17,7 +17,10 @@ export default function EditJob() {
         location: '',
         salary_range: '',
         job_type: '',
-        status: ''
+        status: '',
+        publish_destination: 'feed',
+        tags: '',
+        image_url: ''
     });
 
     useEffect(() => {
@@ -35,7 +38,10 @@ export default function EditJob() {
                 location: data.location,
                 salary_range: data.salary_range || '',
                 job_type: data.job_type,
-                status: data.status
+                status: data.status,
+                publish_destination: data.publish_destination || 'feed',
+                tags: data.tags ? data.tags : '',
+                image_url: data.image_url || ''
             });
         } catch (err) {
             console.error(err);
@@ -55,7 +61,11 @@ export default function EditJob() {
         setError('');
 
         try {
-            await api.put(`/jobs/${id}`, formData);
+            const payload = {
+                ...formData,
+                tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : []
+            };
+            await api.put(`/jobs/${id}`, payload);
             navigate(`/job/${id}`);
         } catch (err) {
             console.error(err);
@@ -134,6 +144,25 @@ export default function EditJob() {
                                 <option value="published">Published (Public)</option>
                                 <option value="closed">Closed</option>
                             </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label>Publish To LinkedIn</label>
+                            <select name="publish_destination" className="form-control" value={formData.publish_destination} onChange={handleChange} required>
+                                <option value="feed">LinkedIn Feed (Instant)</option>
+                                <option value="job_page">Job Page (Incoming...)</option>
+                                <option value="both">Both (Incoming...)</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                            <label>Banner Image URL (LinkedIn Attachment)</label>
+                            <input type="url" name="image_url" className="form-control" value={formData.image_url} onChange={handleChange} placeholder="https://example.com/banner.png" />
+                        </div>
+
+                        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                            <label>Tags (Comma separated)</label>
+                            <input type="text" name="tags" className="form-control" value={formData.tags} onChange={handleChange} placeholder="Python, Backend, Remote" />
                         </div>
                     </div>
 
