@@ -61,6 +61,12 @@ class JobService:
             raise HTTPException(status_code=404, detail="Job not found")
         return job
 
+    async def get_job_public(self, id: UUID) -> Job:
+        job = await self.repository.get_by_id_public(id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        return job
+
     async def update_job(self, id: UUID, job_update: JobUpdate, owner_id: UUID) -> Job:
         job = await self.get_job(id, owner_id)
         update_data = job_update.model_dump(exclude_unset=True)

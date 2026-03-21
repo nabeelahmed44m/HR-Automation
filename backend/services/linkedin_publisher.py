@@ -52,7 +52,10 @@ class LinkedInPublisher:
                 if tags:
                     formatted_tags = "\n" + " ".join([f"#{t.strip()}" for t in tags.split(",") if t.strip()])
 
-                # Generate post content with tags
+                # Generate post content with tags and apply link
+                apply_url = job_data.get('apply_url', "")
+                apply_text = f"\n\n👉 Apply Here: {apply_url}" if apply_url else ""
+                
                 post_content = (
                     f"We're hiring! 🚀\n\n"
                     f"Role: {job_data.get('title', 'N/A')}\n"
@@ -60,6 +63,7 @@ class LinkedInPublisher:
                     f"Type: {job_data.get('job_type', 'N/A')}\n\n"
                     f"Description: {job_data.get('description', 'N/A')}\n\n"
                     f"Requirements: {job_data.get('requirements', 'N/A')}"
+                    f"{apply_text}"
                     f"{formatted_tags}"
                 )
                 

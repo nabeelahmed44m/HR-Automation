@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers.job import router as job_router
 from routers.auth import router as auth_router
+from routers.candidate import router as candidate_router
 import logging
 import asyncio
 from contextlib import asynccontextmanager
@@ -28,6 +29,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(job_router)
+app.include_router(candidate_router)
 
 @app.get("/health")
 def health_check():

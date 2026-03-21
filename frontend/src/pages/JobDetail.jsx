@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MapPin, DollarSign, Clock, ArrowLeft, Trash2, Calendar, Edit, Globe, Info, Shield, MessageSquare, RefreshCw } from 'lucide-react';
+import { MapPin, DollarSign, Clock, ArrowLeft, Trash2, Calendar, Edit, Globe, Info, Shield, MessageSquare, RefreshCw, Mail, Phone, Briefcase, FileText, X, Download, User } from 'lucide-react';
 import api from '../api';
 
 export default function JobDetail() {
@@ -8,11 +8,15 @@ export default function JobDetail() {
     const navigate = useNavigate();
     const [job, setJob] = useState(null);
     const [comments, setComments] = useState([]);
+    const [applicants, setApplicants] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [applicantsLoading, setApplicantsLoading] = useState(false);
     const [error, setError] = useState('');
     const [deleting, setDeleting] = useState(false);
     const [publishLoading, setPublishLoading] = useState(false);
     const [scrapeLoading, setScrapeLoading] = useState(false);
+    const [previewCandidate, setPreviewCandidate] = useState(null);
+    const [activeTab, setActiveTab] = useState('details'); // details, applicants, social
 
     useEffect(() => {
         fetchJob();
@@ -25,6 +29,7 @@ export default function JobDetail() {
             if (data.linkedin_url) {
                 fetchComments();
             }
+            fetchApplicants();
         } catch (err) {
             console.error(err);
             setError('Failed to fetch job details');
@@ -73,8 +78,27 @@ export default function JobDetail() {
         }
     };
 
+    const fetchApplicants = async () => {
+        setApplicantsLoading(true);
+        try {
+            const res = await api.get(`/jobs/${id}/applicants`);
+            setApplicants(res.data);
+        } catch (err) {
+            console.error('Failed to fetch applicants', err);
+        } finally {
+            setApplicantsLoading(false);
+        }
+    };
+
     const handleScrapeComments = async () => {
         await fetchComments();
+    };
+
+    const handleDownload = (cand) => {
+        const link = document.createElement('a');
+        link.href = cand.resume_base64;
+        link.download = cand.resume_filename || 'resume.pdf';
+        link.click();
     };
 
     const getBadgeClass = (status) => {
@@ -191,74 +215,182 @@ export default function JobDetail() {
                 )}
             </div>
 
-            {/* Main Content Split Layout */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '2rem', alignItems: 'start' }}>
+            {/* Tab Navigation */}
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
+                <button
+                    onClick={() => setActiveTab('details')}
+                    style={{
+                        padding: '0.8rem 1.5rem', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '1rem', fontWeight: '600',
+                        background: activeTab === 'details' ? 'var(--accent-gradient)' : 'rgba(255,255,255,0.05)',
+                        color: activeTab === 'details' ? '#fff' : 'var(--text-secondary)',
+                        transition: 'all 0.3s'
+                    }}
+                >
+                    <Info size={18} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} /> Job Description
+                </button>
+                <button
+                    onClick={() => setActiveTab('applicants')}
+                    style={{
+                        padding: '0.8rem 1.5rem', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '1rem', fontWeight: '600',
+                        background: activeTab === 'applicants' ? 'var(--accent-gradient)' : 'rgba(255,255,255,0.05)',
+                        color: activeTab === 'applicants' ? '#fff' : 'var(--text-secondary)',
+                        transition: 'all 0.3s'
+                    }}
+                >
+                    <User size={18} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} /> Applicants ({applicants.length})
+                </button>
+                <button
+                    onClick={() => setActiveTab('social')}
+                    style={{
+                        padding: '0.8rem 1.5rem', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '1rem', fontWeight: '600',
+                        background: activeTab === 'social' ? 'var(--accent-gradient)' : 'rgba(255,255,255,0.05)',
+                        color: activeTab === 'social' ? '#fff' : 'var(--text-secondary)',
+                        transition: 'all 0.3s'
+                    }}
+                >
+                    <MessageSquare size={18} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} /> Social Signals
+                </button>
+            </div>
 
-                {/* Left Column: Details */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '20px' }}>
-                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)', marginBottom: '1.5rem', fontSize: '1.3rem' }}>
-                            <div style={{ padding: '0.5rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px' }}>
-                                <Info size={20} color="var(--accent-secondary)" />
+            {/* Main Content Layouts */}
+            {activeTab === 'details' && (
+                <div className="page-enter" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '2rem', alignItems: 'start' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)', marginBottom: '1.5rem', fontSize: '1.3rem' }}>
+                                <div style={{ padding: '0.5rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px' }}>
+                                    <Info size={20} color="var(--accent-secondary)" />
+                                </div>
+                                About this Role
+                            </h3>
+                            <div style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', whiteSpace: 'pre-line', lineHeight: '1.8' }}>
+                                {job.description}
                             </div>
-                            About this Role
-                        </h3>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', whiteSpace: 'pre-line', lineHeight: '1.8' }}>
-                            {job.description}
+                        </div>
+
+                        <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)', marginBottom: '1.5rem', fontSize: '1.3rem' }}>
+                                <div style={{ padding: '0.5rem', background: 'rgba(6, 182, 212, 0.1)', borderRadius: '8px' }}>
+                                    <Shield size={20} color="var(--accent-primary)" />
+                                </div>
+                                Requirements
+                            </h3>
+                            <div style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', whiteSpace: 'pre-line', lineHeight: '1.8' }}>
+                                {job.requirements}
+                            </div>
                         </div>
                     </div>
 
-                    <div className="glass-panel" style={{ padding: '2.5rem', borderRadius: '20px' }}>
-                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)', marginBottom: '1.5rem', fontSize: '1.3rem' }}>
-                            <div style={{ padding: '0.5rem', background: 'rgba(6, 182, 212, 0.1)', borderRadius: '8px' }}>
-                                <Shield size={20} color="var(--accent-primary)" />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
+                            <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Experience Level</h4>
+                            <div style={{ fontSize: '1.2rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                                {job.experience_level}
                             </div>
-                            Requirements
-                        </h3>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', whiteSpace: 'pre-line', lineHeight: '1.8' }}>
-                            {job.requirements}
                         </div>
+
+                        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
+                            <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>System Timestamp</h4>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.1rem', fontWeight: '500', color: 'var(--text-primary)' }}>
+                                <div style={{ padding: '0.4rem', background: 'rgba(255,255,255,0.05)', borderRadius: '6px' }}>
+                                    <Calendar size={18} color="var(--accent-primary)" />
+                                </div>
+                                {new Date(job.updated_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                            </div>
+                        </div>
+
+                        {job.image_base64 && (
+                            <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
+                                <h4 style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Social Attachment</h4>
+                                <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <img
+                                        src={job.image_base64.startsWith('data:') ? job.image_base64 : (job.image_base64.startsWith('/9j/') ? `data:image/jpeg;base64,${job.image_base64}` : `data:image/png;base64,${job.image_base64}`)}
+                                        alt="Job Banner"
+                                        style={{ width: '100%', height: 'auto', display: 'block' }}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
+            )}
 
-                {/* Right Column: Sidebar */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-
-                    <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
-                        <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Experience Level</h4>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '600', color: 'var(--text-primary)' }}>
-                            {job.experience_level}
+            {activeTab === 'applicants' && (
+                <div className="page-enter glass-panel" style={{ padding: '2.5rem', borderRadius: '20px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)', fontSize: '1.4rem', marginBottom: '2rem' }}>
+                        <div style={{ padding: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px' }}>
+                            <Briefcase size={20} color="var(--success)" />
                         </div>
-                    </div>
+                        Received Applications
+                        <span style={{ fontSize: '0.9rem', padding: '0.3rem 0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '15px', color: 'var(--text-secondary)' }}>
+                            {applicants.length} candidates
+                        </span>
+                    </h3>
 
-                    <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
-                        <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>System Timestamp</h4>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.1rem', fontWeight: '500', color: 'var(--text-primary)' }}>
-                            <div style={{ padding: '0.4rem', background: 'rgba(255,255,255,0.05)', borderRadius: '6px' }}>
-                                <Calendar size={18} color="var(--accent-primary)" />
-                            </div>
-                            {new Date(job.updated_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {applicantsLoading ? (
+                        <div style={{ textAlign: 'center', padding: '2rem' }}><div className="spin"><RefreshCw /></div></div>
+                    ) : applicants.length === 0 ? (
+                        <div style={{ padding: '3rem', textAlign: 'center', background: 'rgba(0,0,0,0.1)', borderRadius: '12px', color: 'var(--text-secondary)' }}>
+                            <p>No one has applied for this job yet.</p>
+                            <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Share the application link on social media to attract candidates.</p>
                         </div>
-                    </div>
-
-                    {job.image_base64 && (
-                        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
-                            <h4 style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Social Attachment</h4>
-                            <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                <img
-                                    src={job.image_base64.startsWith('data:') ? job.image_base64 : (job.image_base64.startsWith('/9j/') ? `data:image/jpeg;base64,${job.image_base64}` : `data:image/png;base64,${job.image_base64}`)}
-                                    alt="Job Banner"
-                                    style={{ width: '100%', height: 'auto', display: 'block' }}
-                                />
-                            </div>
+                    ) : (
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            {applicants.map((cand) => (
+                                <div key={cand.id} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                        <div>
+                                            <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '1.1rem' }}>{cand.full_name}</div>
+                                            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.3rem', fontSize: '0.9rem' }}>
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-primary)' }}><Mail size={14} /> {cand.email}</span>
+                                                {cand.phone && <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}><Phone size={14} /> {cand.phone}</span>}
+                                            </div>
+                                        </div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                            Applied: {new Date(cand.applied_at).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    {cand.linkedin_profile && (
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <a href={cand.linkedin_profile} target="_blank" rel="noreferrer" style={{ fontSize: '0.85rem', color: '#0077b5', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                <Globe size={14} /> View LinkedIn Profile
+                                            </a>
+                                        </div>
+                                    )}
+                                    {cand.resume_base64 && (
+                                        <div style={{ padding: '1.5rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                <div style={{ padding: '0.8rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px' }}><FileText size={24} color="var(--accent-primary)" /></div>
+                                                <div>
+                                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.95rem' }}>{cand.resume_filename}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Resume Uploaded</div>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                                <button onClick={() => setPreviewCandidate(cand)} className="btn btn-secondary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}>
+                                                    Quick Look
+                                                </button>
+                                                <button onClick={() => handleDownload(cand)} className="btn btn-secondary" style={{ padding: '0.6rem 0.6rem', color: 'var(--success)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
+                                                    <Download size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {cand.resume_text && (
+                                        <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', fontSize: '1rem', color: 'var(--text-secondary)', whiteSpace: 'pre-line', maxHeight: '200px', overflowY: 'auto' }}>
+                                            <strong style={{ color: 'var(--text-primary)', display: 'block', marginBottom: '0.5rem' }}>Cover Note:</strong>
+                                            {cand.resume_text}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
-            </div>
+            )}
 
-            {/* Live Comments Block */}
-            {job.linkedin_url && (
-                <div className="glass-panel" style={{ marginTop: '2.5rem', padding: '2.5rem', borderRadius: '20px' }}>
+            {activeTab === 'social' && job.linkedin_url && (
+                <div className="page-enter glass-panel" style={{ padding: '2.5rem', borderRadius: '20px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
                         <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-primary)', fontSize: '1.4rem' }}>
                             <div style={{ padding: '0.5rem', background: 'rgba(168, 85, 247, 0.1)', borderRadius: '8px' }}>
@@ -277,7 +409,7 @@ export default function JobDetail() {
                             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#a855f7', borderColor: 'rgba(168, 85, 247, 0.3)' }}
                         >
                             <RefreshCw size={16} className={scrapeLoading ? "spin" : ""} />
-                            {scrapeLoading ? 'Fetching comments of the post...' : 'Refresh Comments'}
+                            {scrapeLoading ? 'Fetching components...' : 'Refresh Activity'}
                         </button>
                     </div>
 
@@ -287,13 +419,10 @@ export default function JobDetail() {
                                 <RefreshCw size={36} />
                             </div>
                             <p style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '500' }}>Fetching comments of the post...</p>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Connecting to LinkedIn Live Feed...</p>
                         </div>
                     ) : comments.length === 0 ? (
                         <div style={{ padding: '3rem', textAlign: 'center', background: 'rgba(0,0,0,0.1)', borderRadius: '12px', color: 'var(--text-secondary)' }}>
-                            <MessageSquare size={32} style={{ opacity: 0.5, marginBottom: '1rem' }} />
                             <p>No comments found on the live post.</p>
-                            <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Comments appear here in real-time once applicants interact with your post.</p>
                         </div>
                     ) : (
                         <div style={{ display: 'grid', gap: '1rem' }}>
@@ -321,6 +450,50 @@ export default function JobDetail() {
                             ))}
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Resume Preview Modal */}
+            {previewCandidate && (
+                <div style={{
+                    position: 'fixed', inset: 0, zIndex: 1000,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', padding: '2rem'
+                }}>
+                    <div style={{
+                        width: '100%', maxWidth: '900px', height: '94vh',
+                        background: 'var(--bg-secondary)', borderRadius: '24px',
+                        border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden',
+                        display: 'flex', flexDirection: 'column', boxShadow: '0 0 100px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <h3 style={{ color: 'var(--text-primary)', marginBottom: '0.2rem' }}>{previewCandidate.full_name}'s Resume</h3>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{previewCandidate.resume_filename}</p>
+                            </div>
+                            <button onClick={() => setPreviewCandidate(null)} style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: 'var(--danger)', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div style={{ flex: 1, background: '#fff' }}>
+                            {previewCandidate.resume_base64.includes('application/pdf') ? (
+                                <iframe
+                                    src={previewCandidate.resume_base64}
+                                    style={{ width: '100%', height: '100%', border: 'none' }}
+                                    title="Resume Preview"
+                                />
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#333', gap: '1rem', background: '#f8fafc' }}>
+                                    <div style={{ padding: '2rem', background: 'white', border: '1px solid #e2e8f0', borderRadius: '50%', boxShadow: '0 10px 25px rgba(0,0,0,0.05)' }}><FileText size={64} color="var(--accent-primary)" /></div>
+                                    <h4 style={{ color: '#1e293b', fontSize: '1.4rem' }}>Document Preview Unavailable</h4>
+                                    <p style={{ color: '#64748b' }}>This file type cannot be previewed directly in the browser.</p>
+                                    <button onClick={() => handleDownload(previewCandidate)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 2rem' }}>
+                                        <Download size={20} /> Download to View
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

@@ -46,6 +46,8 @@ class JobUpdate(BaseModel):
 
 class JobResponse(JobBase):
     id: UUID
+    owner_id: UUID
+    owner_email: Optional[str] = None
     image_base64: Optional[str] = None
     created_at: datetime
     updated_at: datetime

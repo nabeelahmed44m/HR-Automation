@@ -7,17 +7,18 @@ import EditJob from './pages/EditJob';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Settings from './pages/Settings';
+import PublicApply from './pages/PublicApply';
 
 function Layout({ children }) {
   const location = useLocation();
-  const isAuthPage = ['/login', '/register'].includes(location.pathname);
+  const isPublicPage = ['/login', '/register'].includes(location.pathname) || location.pathname.startsWith('/apply/');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.href = '/login';
   };
 
-  if (isAuthPage) {
+  if (isPublicPage) {
     return <main>{children}</main>;
   }
 
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/job/:id" element={<ProtectedRoute><JobDetail /></ProtectedRoute>} />
           <Route path="/job/:id/edit" element={<ProtectedRoute><EditJob /></ProtectedRoute>} />
+          <Route path="/apply/:id" element={<PublicApply />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

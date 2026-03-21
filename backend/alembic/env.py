@@ -24,6 +24,7 @@ from core.database import Base
 from models.job import Job
 from models.publish import Publication
 from models.user import User
+from models.candidate import Candidate
 from core.config import settings
 
 # add your model's MetaData object here

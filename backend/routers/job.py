@@ -14,6 +14,13 @@ router = APIRouter(prefix="/jobs", tags=["Jobs"])
 def get_job_service(db: AsyncSession = Depends(get_db)) -> JobService:
     return JobService(db)
 
+@router.get("/{id}/public", response_model=JobResponse)
+async def get_job_public(
+    id: UUID, 
+    service: JobService = Depends(get_job_service)
+):
+    return await service.get_job_public(id)
+
 @router.post("", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
 async def create_job(
     job: JobCreate, 

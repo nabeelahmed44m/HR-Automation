@@ -13,6 +13,18 @@ class JobRepository:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
+    async def get_by_id_public(self, id: UUID) -> Optional[Job]:
+        from models.user import User
+        # We join with User to get the owner's email for the public page
+        query = select(Job, User.email.label("owner_email")).join(User, Job.owner_id == User.id).where(Job.id == id)
+        result = await self.session.execute(query)
+        row = result.first()
+        if row:
+            job, owner_email = row
+            job.owner_email = owner_email # Temporarily attach to the object for Pydantic
+            return job
+        return None
+
     async def get_all(self, owner_id: UUID, skip: int = 0, limit: int = 100, status: Optional[str] = None) -> List[Job]:
         query = select(Job).where(Job.owner_id == owner_id)
         if status:

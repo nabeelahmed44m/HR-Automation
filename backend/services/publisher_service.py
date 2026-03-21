@@ -74,7 +74,8 @@ async def publish_job_to_linkedin_background(job_id: UUID):
                     "requirements": job.requirements,
                     "job_type": job.job_type,
                     "image_base64": job.image_base64,
-                    "tags": job.tags
+                    "tags": job.tags,
+                    "apply_url": f"http://localhost:5173/apply/{job.id}"
                 }
                 
                 # Perform publishing based on destination
