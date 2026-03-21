@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
@@ -18,6 +18,13 @@ class JobBase(BaseModel):
     publish_destination: Optional[PublishDestination] = Field(default=PublishDestination.feed, description="Feed is available now. Job page is an incoming feature.")
     image_url: Optional[str] = None
     tags: Optional[List[str]] = Field(default_factory=list)
+
+    @field_validator('tags', mode='before')
+    @classmethod
+    def validate_tags(cls, v):
+        if isinstance(v, str):
+            return [t.strip() for t in v.split(',') if t.strip()]
+        return v or []
 
 class JobCreate(JobBase):
     pass

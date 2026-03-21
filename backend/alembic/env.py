@@ -22,6 +22,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from core.database import Base
 from models.job import Job
+from models.publish import Publication
+from models.user import User
 from core.config import settings
 
 # add your model's MetaData object here

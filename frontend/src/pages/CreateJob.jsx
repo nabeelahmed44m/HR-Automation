@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save, AlertCircle } from 'lucide-react';
 import api from '../api';
@@ -21,6 +21,23 @@ export default function CreateJob() {
         image_url: ''
     });
 
+    useEffect(() => {
+        fetchProfileDefaults();
+    }, []);
+
+    const fetchProfileDefaults = async () => {
+        try {
+            const { data } = await api.get('/auth/me');
+            if (data.preferred_platform === 'none') {
+                setFormData(prev => ({ ...prev, publish_destination: 'none' }));
+            } else {
+                setFormData(prev => ({ ...prev, publish_destination: data.preferred_destination }));
+            }
+        } catch (err) {
+            console.error('Failed to fetch profile defaults', err);
+        }
+    };
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -35,6 +52,14 @@ export default function CreateJob() {
                 ...formData,
                 tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : []
             };
+
+            // If they chose 'none', we don't send it to the backend as it might not be in the Enum or we treat it as no-op
+            if (payload.publish_destination === 'none') {
+                // You might choose to send null or handle it backend side. 
+                // For now, let's just let it pass if the backend supports null.
+                payload.publish_destination = null;
+            }
+
             await api.post('/jobs', payload);
             navigate('/');
         } catch (err) {
@@ -113,7 +138,8 @@ export default function CreateJob() {
 
                         <div className="form-group">
                             <label>Publish To LinkedIn</label>
-                            <select name="publish_destination" className="form-control" value={formData.publish_destination} onChange={handleChange} required>
+                            <select name="publish_destination" className="form-control" value={formData.publish_destination || 'none'} onChange={handleChange} required>
+                                <option value="none">Do not publish</option>
                                 <option value="feed">LinkedIn Feed (Instant)</option>
                                 <option value="job_page">Job Page (Incoming...)</option>
                                 <option value="both">Both (Incoming...)</option>

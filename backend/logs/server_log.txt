@@ -1,0 +1,338 @@
+INFO:     Started server process [56741]
+INFO:     Waiting for application startup.
+INFO:services.publisher_service:Starting background publish scheduler (cron-like)...
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-03-21 09:54:12,083 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+INFO:sqlalchemy.engine.Engine:select pg_catalog.version()
+2026-03-21 09:54:12,084 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO:sqlalchemy.engine.Engine:[raw sql] ()
+2026-03-21 09:54:12,739 INFO sqlalchemy.engine.Engine select current_schema()
+INFO:sqlalchemy.engine.Engine:select current_schema()
+2026-03-21 09:54:12,739 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO:sqlalchemy.engine.Engine:[raw sql] ()
+2026-03-21 09:54:13,613 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+INFO:sqlalchemy.engine.Engine:show standard_conforming_strings
+2026-03-21 09:54:13,613 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO:sqlalchemy.engine.Engine:[raw sql] ()
+2026-03-21 09:54:14,268 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:54:14,276 INFO sqlalchemy.engine.Engine SELECT jobs.id, jobs.title, jobs.description, jobs.requirements, jobs.experience_level, jobs.location, jobs.salary_range, jobs.job_type, jobs.status, jobs.linkedin_url, jobs.publish_status, jobs.publish_destination, jobs.image_base64, jobs.tags, jobs.created_at, jobs.updated_at 
+FROM jobs 
+WHERE jobs.publish_status = $1::publishstatus OR jobs.publish_status IS NULL
+INFO:sqlalchemy.engine.Engine:SELECT jobs.id, jobs.title, jobs.description, jobs.requirements, jobs.experience_level, jobs.location, jobs.salary_range, jobs.job_type, jobs.status, jobs.linkedin_url, jobs.publish_status, jobs.publish_destination, jobs.image_base64, jobs.tags, jobs.created_at, jobs.updated_at 
+FROM jobs 
+WHERE jobs.publish_status = $1::publishstatus OR jobs.publish_status IS NULL
+2026-03-21 09:54:14,276 INFO sqlalchemy.engine.Engine [generated in 0.00026s] ('failed',)
+INFO:sqlalchemy.engine.Engine:[generated in 0.00026s] ('failed',)
+2026-03-21 09:54:14,276 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:54:14,278 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2026-03-21 09:54:14,278 INFO sqlalchemy.engine.Engine [generated in 0.00019s] ('curltest5@example.com',)
+INFO:sqlalchemy.engine.Engine:[generated in 0.00019s] ('curltest5@example.com',)
+2026-03-21 09:54:14,993 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+INFO:     127.0.0.1:59853 - "POST /auth/register HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 526, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 773, in _prepare
+    prepared_stmt = await self._connection.prepare(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/asyncpg/connection.py", line 638, in prepare
+    return await self._prepare(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/asyncpg/connection.py", line 657, in _prepare
+    stmt = await self._get_statement(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/asyncpg/connection.py", line 443, in _get_statement
+    statement = await self._protocol.prepare(
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedTableError: relation "users" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedTableError'>: relation "users" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/uvicorn/protocols/http/h11_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/fastapi/applications.py", line 1138, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/fastapi/routing.py", line 121, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/fastapi/routing.py", line 107, in app
+    response = await f(request)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/fastapi/routing.py", line 426, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/fastapi/routing.py", line 314, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/dev/Documents/HR Automation/backend/routers/auth.py", line 17, in register
+    user = await auth_service.repository.get_by_email(user_in.email)
+  File "/Users/dev/Documents/HR Automation/backend/repositories/user.py", line 14, in get_by_email
+    result = await self.session.execute(query)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/ext/asyncio/session.py", line 449, in execute
+    result = await greenlet_spawn(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/dev/Documents/HR Automation/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "users" does not exist
+[SQL: SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR]
+[parameters: ('curltest5@example.com',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-03-21 09:54:16,514 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+2026-03-21 09:55:16,732 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:55:16,733 INFO sqlalchemy.engine.Engine SELECT jobs.id, jobs.title, jobs.description, jobs.requirements, jobs.experience_level, jobs.location, jobs.salary_range, jobs.job_type, jobs.status, jobs.linkedin_url, jobs.publish_status, jobs.publish_destination, jobs.image_base64, jobs.tags, jobs.created_at, jobs.updated_at 
+FROM jobs 
+WHERE jobs.publish_status = $1::publishstatus OR jobs.publish_status IS NULL
+INFO:sqlalchemy.engine.Engine:SELECT jobs.id, jobs.title, jobs.description, jobs.requirements, jobs.experience_level, jobs.location, jobs.salary_range, jobs.job_type, jobs.status, jobs.linkedin_url, jobs.publish_status, jobs.publish_destination, jobs.image_base64, jobs.tags, jobs.created_at, jobs.updated_at 
+FROM jobs 
+WHERE jobs.publish_status = $1::publishstatus OR jobs.publish_status IS NULL
+2026-03-21 09:55:16,733 INFO sqlalchemy.engine.Engine [cached since 62.46s ago] ('failed',)
+INFO:sqlalchemy.engine.Engine:[cached since 62.46s ago] ('failed',)
+2026-03-21 09:55:18,892 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+2026-03-21 09:56:19,168 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:56:19,169 INFO sqlalchemy.engine.Engine SELECT jobs.id, jobs.title, jobs.description, jobs.requirements, jobs.experience_level, jobs.location, jobs.salary_range, jobs.job_type, jobs.status, jobs.linkedin_url, jobs.publish_status, jobs.publish_destination, jobs.image_base64, jobs.tags, jobs.created_at, jobs.updated_at 
+FROM jobs 
+WHERE jobs.publish_status = $1::publishstatus OR jobs.publish_status IS NULL
+INFO:sqlalchemy.engine.Engine:SELECT jobs.id, jobs.title, jobs.description, jobs.requirements, jobs.experience_level, jobs.location, jobs.salary_range, jobs.job_type, jobs.status, jobs.linkedin_url, jobs.publish_status, jobs.publish_destination, jobs.image_base64, jobs.tags, jobs.created_at, jobs.updated_at 
+FROM jobs 
+WHERE jobs.publish_status = $1::publishstatus OR jobs.publish_status IS NULL
+2026-03-21 09:56:19,169 INFO sqlalchemy.engine.Engine [cached since 124.9s ago] ('failed',)
+INFO:sqlalchemy.engine.Engine:[cached since 124.9s ago] ('failed',)
+2026-03-21 09:56:19,655 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+2026-03-21 09:56:23,052 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:56:23,052 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2026-03-21 09:56:23,052 INFO sqlalchemy.engine.Engine [cached since 128.7s ago] ('test@example.com',)
+INFO:sqlalchemy.engine.Engine:[cached since 128.7s ago] ('test@example.com',)
+2026-03-21 09:56:24,015 INFO sqlalchemy.engine.Engine INSERT INTO users (id, email, hashed_password, is_active, is_superuser) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::BOOLEAN, $5::BOOLEAN) RETURNING users.created_at, users.updated_at
+INFO:sqlalchemy.engine.Engine:INSERT INTO users (id, email, hashed_password, is_active, is_superuser) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::BOOLEAN, $5::BOOLEAN) RETURNING users.created_at, users.updated_at
+2026-03-21 09:56:24,015 INFO sqlalchemy.engine.Engine [generated in 0.00027s] (UUID('971d6b3c-a90f-41d5-9113-f368a4921d99'), 'test@example.com', '$2b$12$GtCuML.4m9LfU2my/3DBkO8a7aAaA3ZEFcaiXGO1xEgkZdNt0MvPG', True, False)
+INFO:sqlalchemy.engine.Engine:[generated in 0.00027s] (UUID('971d6b3c-a90f-41d5-9113-f368a4921d99'), 'test@example.com', '$2b$12$GtCuML.4m9LfU2my/3DBkO8a7aAaA3ZEFcaiXGO1xEgkZdNt0MvPG', True, False)
+2026-03-21 09:56:24,573 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = $1::UUID
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = $1::UUID
+2026-03-21 09:56:24,573 INFO sqlalchemy.engine.Engine [generated in 0.00024s] (UUID('971d6b3c-a90f-41d5-9113-f368a4921d99'),)
+INFO:sqlalchemy.engine.Engine:[generated in 0.00024s] (UUID('971d6b3c-a90f-41d5-9113-f368a4921d99'),)
+INFO:     127.0.0.1:59923 - "POST /auth/register HTTP/1.1" 200 OK
+2026-03-21 09:56:25,122 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+2026-03-21 09:56:25,132 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:56:25,133 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2026-03-21 09:56:25,133 INFO sqlalchemy.engine.Engine [cached since 130.8s ago] ('test@example.com',)
+INFO:sqlalchemy.engine.Engine:[cached since 130.8s ago] ('test@example.com',)
+2026-03-21 09:56:25,826 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+INFO:     127.0.0.1:59924 - "POST /auth/login HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:59926 - "GET /jobs HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:59927 - "GET /jobs HTTP/1.1" 401 Unauthorized
+2026-03-21 09:56:41,121 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:56:41,121 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2026-03-21 09:56:41,121 INFO sqlalchemy.engine.Engine [cached since 146.8s ago] ('test_new@example.com',)
+INFO:sqlalchemy.engine.Engine:[cached since 146.8s ago] ('test_new@example.com',)
+2026-03-21 09:56:41,900 INFO sqlalchemy.engine.Engine INSERT INTO users (id, email, hashed_password, is_active, is_superuser) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::BOOLEAN, $5::BOOLEAN) RETURNING users.created_at, users.updated_at
+INFO:sqlalchemy.engine.Engine:INSERT INTO users (id, email, hashed_password, is_active, is_superuser) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::BOOLEAN, $5::BOOLEAN) RETURNING users.created_at, users.updated_at
+2026-03-21 09:56:41,900 INFO sqlalchemy.engine.Engine [cached since 17.88s ago] (UUID('08e1ada3-efa3-4d56-b9ec-613b9035ddf1'), 'test_new@example.com', '$2b$12$MtPCxLLBqWNrgUF9FVkHJ.3o8.YNRybr9bv1H0RIPgKdVcs2ejafu', True, False)
+INFO:sqlalchemy.engine.Engine:[cached since 17.88s ago] (UUID('08e1ada3-efa3-4d56-b9ec-613b9035ddf1'), 'test_new@example.com', '$2b$12$MtPCxLLBqWNrgUF9FVkHJ.3o8.YNRybr9bv1H0RIPgKdVcs2ejafu', True, False)
+2026-03-21 09:56:42,185 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = $1::UUID
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = $1::UUID
+2026-03-21 09:56:42,185 INFO sqlalchemy.engine.Engine [cached since 17.61s ago] (UUID('08e1ada3-efa3-4d56-b9ec-613b9035ddf1'),)
+INFO:sqlalchemy.engine.Engine:[cached since 17.61s ago] (UUID('08e1ada3-efa3-4d56-b9ec-613b9035ddf1'),)
+INFO:     127.0.0.1:59931 - "POST /auth/register HTTP/1.1" 200 OK
+2026-03-21 09:56:42,423 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+2026-03-21 09:56:42,428 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:56:42,428 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2026-03-21 09:56:42,429 INFO sqlalchemy.engine.Engine [cached since 148.1s ago] ('test_new@example.com',)
+INFO:sqlalchemy.engine.Engine:[cached since 148.1s ago] ('test_new@example.com',)
+2026-03-21 09:56:42,901 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+INFO:     127.0.0.1:59932 - "POST /auth/login HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:59933 - "GET /jobs HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:59934 - "GET /jobs HTTP/1.1" 401 Unauthorized
+2026-03-21 09:57:04,294 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:57:04,294 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2026-03-21 09:57:04,294 INFO sqlalchemy.engine.Engine [cached since 170s ago] ('test_new@example.com',)
+INFO:sqlalchemy.engine.Engine:[cached since 170s ago] ('test_new@example.com',)
+2026-03-21 09:57:04,781 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+INFO:     127.0.0.1:59949 - "POST /auth/login HTTP/1.1" 401 Unauthorized
+2026-03-21 09:57:19,874 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:57:19,875 INFO sqlalchemy.engine.Engine SELECT jobs.id, jobs.title, jobs.description, jobs.requirements, jobs.experience_level, jobs.location, jobs.salary_range, jobs.job_type, jobs.status, jobs.linkedin_url, jobs.publish_status, jobs.publish_destination, jobs.image_base64, jobs.tags, jobs.created_at, jobs.updated_at 
+FROM jobs 
+WHERE jobs.publish_status = $1::publishstatus OR jobs.publish_status IS NULL
+INFO:sqlalchemy.engine.Engine:SELECT jobs.id, jobs.title, jobs.description, jobs.requirements, jobs.experience_level, jobs.location, jobs.salary_range, jobs.job_type, jobs.status, jobs.linkedin_url, jobs.publish_status, jobs.publish_destination, jobs.image_base64, jobs.tags, jobs.created_at, jobs.updated_at 
+FROM jobs 
+WHERE jobs.publish_status = $1::publishstatus OR jobs.publish_status IS NULL
+2026-03-21 09:57:19,875 INFO sqlalchemy.engine.Engine [cached since 185.6s ago] ('failed',)
+INFO:sqlalchemy.engine.Engine:[cached since 185.6s ago] ('failed',)
+2026-03-21 09:57:20,312 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+2026-03-21 09:57:28,507 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:57:28,507 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2026-03-21 09:57:28,508 INFO sqlalchemy.engine.Engine [cached since 194.2s ago] ('test_final@example.com',)
+INFO:sqlalchemy.engine.Engine:[cached since 194.2s ago] ('test_final@example.com',)
+2026-03-21 09:57:29,239 INFO sqlalchemy.engine.Engine INSERT INTO users (id, email, hashed_password, is_active, is_superuser) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::BOOLEAN, $5::BOOLEAN) RETURNING users.created_at, users.updated_at
+INFO:sqlalchemy.engine.Engine:INSERT INTO users (id, email, hashed_password, is_active, is_superuser) VALUES ($1::UUID, $2::VARCHAR, $3::VARCHAR, $4::BOOLEAN, $5::BOOLEAN) RETURNING users.created_at, users.updated_at
+2026-03-21 09:57:29,239 INFO sqlalchemy.engine.Engine [cached since 65.22s ago] (UUID('70bd81a4-8d2d-4471-ae38-717cf8bc8d38'), 'test_final@example.com', '$2b$12$UScxhk7rNCMEWrappN7xIuGTDK55v6oWGIJrPYn5RGrlm1zuJx2ai', True, False)
+INFO:sqlalchemy.engine.Engine:[cached since 65.22s ago] (UUID('70bd81a4-8d2d-4471-ae38-717cf8bc8d38'), 'test_final@example.com', '$2b$12$UScxhk7rNCMEWrappN7xIuGTDK55v6oWGIJrPYn5RGrlm1zuJx2ai', True, False)
+2026-03-21 09:57:29,479 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = $1::UUID
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = $1::UUID
+2026-03-21 09:57:29,479 INFO sqlalchemy.engine.Engine [cached since 64.91s ago] (UUID('70bd81a4-8d2d-4471-ae38-717cf8bc8d38'),)
+INFO:sqlalchemy.engine.Engine:[cached since 64.91s ago] (UUID('70bd81a4-8d2d-4471-ae38-717cf8bc8d38'),)
+INFO:     127.0.0.1:59964 - "POST /auth/register HTTP/1.1" 200 OK
+2026-03-21 09:57:29,717 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+2026-03-21 09:57:29,722 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2026-03-21 09:57:29,722 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT users.id, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2026-03-21 09:57:29,723 INFO sqlalchemy.engine.Engine [cached since 195.4s ago] ('test_final@example.com',)
+INFO:sqlalchemy.engine.Engine:[cached since 195.4s ago] ('test_final@example.com',)
+2026-03-21 09:57:30,197 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:sqlalchemy.engine.Engine:ROLLBACK
+INFO:     127.0.0.1:59965 - "POST /auth/login HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:59966 - "GET /jobs HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:59967 - "GET /jobs HTTP/1.1" 401 Unauthorized

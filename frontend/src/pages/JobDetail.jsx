@@ -88,10 +88,10 @@ export default function JobDetail() {
                                 </span>
                             )}
                         </div>
-                        {job.tags && (
+                        {job.tags && job.tags.length > 0 && (
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                                {job.tags.split(',').map(tag => (
-                                    <span key={tag} style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', opacity: 0.8 }}>#{tag.trim()}</span>
+                                {job.tags.map(tag => (
+                                    <span key={tag} style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', opacity: 0.8 }}>#{tag}</span>
                                 ))}
                             </div>
                         )}
@@ -161,7 +161,11 @@ export default function JobDetail() {
                         {job.image_base64 && (
                             <div className="glass-panel" style={{ padding: '1rem' }}>
                                 <h4 style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.9rem', textTransform: 'uppercase' }}>Attachment Thumbnail</h4>
-                                <img src={`data:image/png;base64,${job.image_base64}`} alt="Job Attachment" style={{ width: '100%', borderRadius: '10px', height: '200px', objectFit: 'cover' }} />
+                                <img
+                                    src={job.image_base64.startsWith('data:') ? job.image_base64 : (job.image_base64.startsWith('/9j/') ? `data:image/jpeg;base64,${job.image_base64}` : `data:image/png;base64,${job.image_base64}`)}
+                                    alt="Job Attachment"
+                                    style={{ width: '100%', borderRadius: '10px', height: '200px', objectFit: 'cover' }}
+                                />
                             </div>
                         )}
                     </div>

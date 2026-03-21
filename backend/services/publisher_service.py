@@ -6,8 +6,11 @@ from core.database import AsyncSessionLocal
 from repositories.job import JobRepository
 from repositories.publish import PublicationRepository
 from models.job import Job
+from models.user import User
 from models.publish import Publication, PublishStatus, PublishDestination
 from .linkedin_publisher import LinkedInPublisher
+
+from repositories.user import UserRepository
 
 logger = logging.getLogger(__name__)
 
@@ -15,13 +18,30 @@ async def publish_job_to_linkedin_background(job_id: UUID):
     async with AsyncSessionLocal() as session:
         repository = JobRepository(session)
         pub_repository = PublicationRepository(session)
-        linkedin_publisher = LinkedInPublisher()
+        user_repo = UserRepository(session)
         
-        # Fetch job
-        job = await repository.get_by_id(job_id)
-        if not job:
-            logger.error(f"Job {job_id} not found for publishing.")
+        # Fetch job and join with User to get credentials
+        query = select(Job, User).join(User, Job.owner_id == User.id).where(Job.id == job_id)
+        result = await session.execute(query)
+        row = result.first()
+        
+        if not row:
+            logger.error(f"Job {job_id} or its owner not found for publishing.")
             return
+            
+        job, user = row
+        
+        # Check if the user's cookie is already flagged as expired
+        if user.linkedin_cookie_expired:
+            logger.warning(f"User {user.id} has an expired LinkedIn cookie. Job {job_id} cannot be published.")
+            await repository.update(job, {"publish_status": PublishStatus.failed})
+            await session.commit()
+            return
+
+        # Initialize publisher with user's linkedin credentials
+        linkedin_publisher = LinkedInPublisher(
+            cookie=user.linkedin_cookie
+        )
 
         # 1. Create a detailed Publication task record
         publication = await pub_repository.create({
@@ -86,12 +106,25 @@ async def publish_job_to_linkedin_background(job_id: UUID):
                 return
                 
             except Exception as e:
+                err_msg = str(e)
                 logger.error(f"Attempt {attempt + 1} failed: {e}")
+                
+                # If cookie is expired or missing, mark DB and ABORT retries!
+                if "expired" in err_msg.lower() or "missing" in err_msg.lower() or "blocked" in err_msg.lower():
+                    logger.error("Cookie expiration detected. Aborting retries and flagging user account.")
+                    await user_repo.update(user, {"linkedin_cookie_expired": True})
+                    await repository.update(job, {"publish_status": PublishStatus.failed})
+                    await pub_repository.update(publication, {
+                        "status": PublishStatus.failed,
+                        "error_log": err_msg
+                    })
+                    await session.commit()
+                    return
+
                 if attempt < retries - 1:
                     await asyncio.sleep(5)  # Backoff
                 else:
                     # Final update failure in both tables
-                    err_msg = str(e)
                     await repository.update(job, {"publish_status": PublishStatus.failed})
                     await pub_repository.update(publication, {
                         "status": PublishStatus.failed,

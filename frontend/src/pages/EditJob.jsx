@@ -40,7 +40,7 @@ export default function EditJob() {
                 job_type: data.job_type,
                 status: data.status,
                 publish_destination: data.publish_destination || 'feed',
-                tags: data.tags ? data.tags : '',
+                tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || ''),
                 image_url: data.image_url || ''
             });
         } catch (err) {
@@ -63,8 +63,13 @@ export default function EditJob() {
         try {
             const payload = {
                 ...formData,
-                tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : []
+                tags: typeof formData.tags === 'string' ? formData.tags.split(',').map(t => t.trim()) : (Array.isArray(formData.tags) ? formData.tags : [])
             };
+
+            if (payload.publish_destination === 'none') {
+                payload.publish_destination = null;
+            }
+
             await api.put(`/jobs/${id}`, payload);
             navigate(`/job/${id}`);
         } catch (err) {
@@ -148,7 +153,8 @@ export default function EditJob() {
 
                         <div className="form-group">
                             <label>Publish To LinkedIn</label>
-                            <select name="publish_destination" className="form-control" value={formData.publish_destination} onChange={handleChange} required>
+                            <select name="publish_destination" className="form-control" value={formData.publish_destination || 'none'} onChange={handleChange} required>
+                                <option value="none">Do not publish</option>
                                 <option value="feed">LinkedIn Feed (Instant)</option>
                                 <option value="job_page">Job Page (Incoming...)</option>
                                 <option value="both">Both (Incoming...)</option>

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, Numeric, Enum, DateTime, func
+from sqlalchemy import Column, String, Text, Numeric, Enum, DateTime, func, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from core.database import Base
 import uuid
@@ -15,6 +15,7 @@ class Job(Base):
     __tablename__ = "jobs"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     title = Column(String, index=True, nullable=False)
     description = Column(Text, nullable=False)
     requirements = Column(Text, nullable=False)

@@ -14,7 +14,7 @@ class JobService:
         self.repository = JobRepository(session)
         self.session = session
 
-    async def create_job(self, job: JobCreate) -> Job:
+    async def create_job(self, job: JobCreate, owner_id: UUID) -> Job:
         try:
             job_data = job.model_dump()
             
@@ -27,8 +27,10 @@ class JobService:
                     async with httpx.AsyncClient() as client:
                         response = await client.get(image_url)
                         if response.status_code == 200:
-                            job_data["image_base64"] = base64.b64encode(response.content).decode("utf-8")
-                            logger.info(f"Successfully fetched image from {image_url}")
+                            content_type = response.headers.get("content-type", "image/png")
+                            base64_data = base64.b64encode(response.content).decode("utf-8")
+                            job_data["image_base64"] = f"data:{content_type};base64,{base64_data}"
+                            logger.info(f"Successfully fetched image from {image_url} (type: {content_type})")
                 except Exception as img_err:
                     logger.warning(f"Failed to fetch image from {image_url}: {str(img_err)}")
 
@@ -37,43 +39,43 @@ class JobService:
             if tags_list:
                 job_data["tags"] = ",".join(tags_list)
                 
-            created_job = await self.repository.create(job_data)
+            created_job = await self.repository.create(job_data, owner_id)
             await self.session.commit()
-            logger.info(f"Created job {created_job.id}")
+            logger.info(f"Created job {created_job.id} for user {owner_id}")
             return created_job
         except Exception as e:
             await self.session.rollback()
             logger.error(f"Error creating job: {str(e)}")
             raise HTTPException(status_code=500, detail="Internal server error")
 
-    async def get_jobs(self, skip: int = 0, limit: int = 100, status: str = None) -> List[Job]:
-        return await self.repository.get_all(skip, limit, status)
+    async def get_jobs(self, owner_id: UUID, skip: int = 0, limit: int = 100, status: str = None) -> List[Job]:
+        return await self.repository.get_all(owner_id, skip, limit, status)
 
-    async def get_job(self, id: UUID) -> Job:
-        job = await self.repository.get_by_id(id)
+    async def get_job(self, id: UUID, owner_id: UUID) -> Job:
+        job = await self.repository.get_by_id(id, owner_id)
         if not job:
             raise HTTPException(status_code=404, detail="Job not found")
         return job
 
-    async def update_job(self, id: UUID, job_update: JobUpdate) -> Job:
-        job = await self.get_job(id)
+    async def update_job(self, id: UUID, job_update: JobUpdate, owner_id: UUID) -> Job:
+        job = await self.get_job(id, owner_id)
         update_data = job_update.model_dump(exclude_unset=True)
         try:
             updated_job = await self.repository.update(job, update_data)
             await self.session.commit()
-            logger.info(f"Updated job {id}")
+            logger.info(f"Updated job {id} for user {owner_id}")
             return updated_job
         except Exception as e:
             await self.session.rollback()
             logger.error(f"Error updating job {id}: {str(e)}")
             raise HTTPException(status_code=500, detail="Internal server error")
 
-    async def delete_job(self, id: UUID) -> None:
-        job = await self.get_job(id)
+    async def delete_job(self, id: UUID, owner_id: UUID) -> None:
+        job = await self.get_job(id, owner_id)
         try:
             await self.repository.delete(job)
             await self.session.commit()
-            logger.info(f"Deleted job {id}")
+            logger.info(f"Deleted job {id} for user {owner_id}")
         except Exception as e:
             await self.session.rollback()
             logger.error(f"Error deleting job {id}: {str(e)}")

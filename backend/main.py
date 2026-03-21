@@ -1,6 +1,8 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers.job import router as job_router
+from routers.auth import router as auth_router
 import logging
 import asyncio
 from contextlib import asynccontextmanager
@@ -24,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(job_router)
 
 @app.get("/health")
