@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Text, Numeric, Enum, DateTime, func, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from core.database import Base
 import uuid
 import enum

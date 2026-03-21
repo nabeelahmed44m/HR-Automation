@@ -467,3 +467,5 @@ textarea.form-control {
     transform: rotate(360deg);
   }
 }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }

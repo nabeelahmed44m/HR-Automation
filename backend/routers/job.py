@@ -38,6 +38,32 @@ async def publish_to_linkedin(
     background_tasks.add_task(publish_job_to_linkedin_background, id)
     return {"status": "LinkedIn publish task initiated in background", "job_id": id}
 
+@router.get("/{id}/comments")
+async def get_job_comments(
+    id: UUID,
+    current_user: User = Depends(get_current_user),
+    service: JobService = Depends(get_job_service)
+):
+    from fastapi import HTTPException
+    
+    # 1. Verify User and Job Validation
+    job = await service.get_job(id, current_user.id)
+    if not job.linkedin_url:
+        return []
+        
+    if not current_user.linkedin_cookie:
+        raise HTTPException(status_code=400, detail="LinkedIn cookie missing. Reconnect in Settings.")
+        
+    # 2. Invoke scraper synchronously on-the-fly
+    from services.linkedin_scraper import LinkedInScraper
+    scraper = LinkedInScraper(cookie=current_user.linkedin_cookie)
+    try:
+        scraped_data = await scraper.scrape_comments(job.linkedin_url)
+        # We do NOT save the scraped data in the DB anymore as per architecture decision
+        return scraped_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("", response_model=List[JobResponse])
 async def list_jobs(
     skip: int = 0, 
