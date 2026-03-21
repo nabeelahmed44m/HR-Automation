@@ -46,6 +46,7 @@ async def publish_job_to_linkedin_background(job_id: UUID):
         # 1. Create a detailed Publication task record
         publication = await pub_repository.create({
             "job_id": job_id,
+            "user_id": user.id,
             "destination": job.publish_destination,
             "status": PublishStatus.pending,
             "platform": "linkedin"
@@ -55,7 +56,7 @@ async def publish_job_to_linkedin_background(job_id: UUID):
         await repository.update(job, {"publish_status": PublishStatus.pending})
         await session.commit()
         
-        retries = 3
+        retries = 1
         for attempt in range(retries):
             try:
                 logger.info(f"Publishing job {job_id} to LinkedIn (Attempt {attempt + 1}/{retries})")
@@ -121,30 +122,27 @@ async def publish_job_to_linkedin_background(job_id: UUID):
                     await session.commit()
                     return
 
-                if attempt < retries - 1:
-                    await asyncio.sleep(5)  # Backoff
-                else:
-                    # Final update failure in both tables
-                    await repository.update(job, {"publish_status": PublishStatus.failed})
-                    await pub_repository.update(publication, {
-                        "status": PublishStatus.failed,
-                        "error_log": err_msg
-                    })
-                    await session.commit()
-                    logger.error(f"All {retries} attempts failed for job {job_id}")
+                # Final update failure in both tables
+                await repository.update(job, {"publish_status": PublishStatus.failed})
+                await pub_repository.update(publication, {
+                    "status": PublishStatus.failed,
+                    "error_log": err_msg
+                })
+                await session.commit()
+                logger.error(f"Publish attempt failed for job {job_id}")
 
 async def run_cron_publish_scheduler():
     """
-    Simulates a cron job by polling for jobs or tasks that failed or are stuck.
+    Simulates a cron job by polling for jobs or tasks that are stuck.
     """
     logger.info("Starting background publish scheduler (cron-like)...")
     while True:
         try:
             async with AsyncSessionLocal() as session:
-                # We can poll for jobs that have NO publications OR FAILED ones
+                # Poll entirely orphaned jobs exactly once. 
+                # (Ignore failed ones so they don't infinitely retry)
                 repository = JobRepository(session)
                 query = select(Job).where(
-                    (Job.publish_status == PublishStatus.failed) | 
                     (Job.publish_status == None)
                 )
                 result = await session.execute(query)

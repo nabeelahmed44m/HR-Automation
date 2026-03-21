@@ -19,6 +19,7 @@ class Publication(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     job_id = Column(UUID(as_uuid=True), ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=True) # Set true to migrate existing safely
     platform = Column(String, default="linkedin", nullable=False)
     destination = Column(Enum(PublishDestination), nullable=False)
     status = Column(Enum(PublishStatus), default=PublishStatus.pending, nullable=False)

@@ -6,6 +6,7 @@ from models.publish import PublishStatus, PublishDestination
 
 class PublicationBase(BaseModel):
     job_id: UUID
+    user_id: Optional[UUID] = None
     platform: str = "linkedin"
     destination: PublishDestination
     status: PublishStatus = PublishStatus.pending

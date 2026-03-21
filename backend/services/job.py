@@ -39,6 +39,10 @@ class JobService:
             if tags_list:
                 job_data["tags"] = ",".join(tags_list)
                 
+            from models.publish import PublishStatus
+            # Pre-lock the status as pending so the Cron task doesn't duplicate grab it!
+            job_data["publish_status"] = PublishStatus.pending
+            
             created_job = await self.repository.create(job_data, owner_id)
             await self.session.commit()
             logger.info(f"Created job {created_job.id} for user {owner_id}")
