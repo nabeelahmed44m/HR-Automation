@@ -1,5 +1,5 @@
-from sqlalchemy import Column, String, Text, DateTime, func, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, Text, DateTime, func, ForeignKey, Numeric
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from core.database import Base
 import uuid
 
@@ -15,5 +15,7 @@ class Candidate(Base):
     resume_base64 = Column(Text, nullable=True)
     resume_filename = Column(String, nullable=True)
     linkedin_profile = Column(String, nullable=True)
-    status = Column(String, default="pending") # pending, reviewed, rejected, accepted
+    status = Column(String, default="pending") # pending, shortlisted, review, rejected, accepted
+    ats_score = Column(Numeric, nullable=True)
+    ats_explanation = Column(JSONB, nullable=True)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())

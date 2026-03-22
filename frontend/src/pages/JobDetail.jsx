@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MapPin, DollarSign, Clock, ArrowLeft, Trash2, Calendar, Edit, Globe, Info, Shield, MessageSquare, RefreshCw, Mail, Phone, Briefcase, FileText, X, Download, User } from 'lucide-react';
+import { MapPin, DollarSign, Clock, ArrowLeft, Trash2, Calendar, Edit, Globe, Info, Shield, MessageSquare, RefreshCw, Mail, Phone, Briefcase, FileText, X, Download, User, Sparkles, CheckCircle } from 'lucide-react';
 import api from '../api';
 
 export default function JobDetail() {
@@ -17,9 +17,14 @@ export default function JobDetail() {
     const [scrapeLoading, setScrapeLoading] = useState(false);
     const [previewCandidate, setPreviewCandidate] = useState(null);
     const [activeTab, setActiveTab] = useState('details'); // details, applicants, social
+    const [applicantsCount, setApplicantsCount] = useState(0);
 
     useEffect(() => {
-        fetchJob();
+        if (id) {
+            fetchJob();
+            fetchApplicants();
+            fetchApplicantsCount();
+        }
     }, [id]);
 
     const fetchJob = async () => {
@@ -29,7 +34,6 @@ export default function JobDetail() {
             if (data.linkedin_url) {
                 fetchComments();
             }
-            fetchApplicants();
         } catch (err) {
             console.error(err);
             setError('Failed to fetch job details');
@@ -87,6 +91,15 @@ export default function JobDetail() {
             console.error('Failed to fetch applicants', err);
         } finally {
             setApplicantsLoading(false);
+        }
+    };
+
+    const fetchApplicantsCount = async () => {
+        try {
+            const { data } = await api.get(`/jobs/${id}/application/count`);
+            setApplicantsCount(data.count);
+        } catch (err) {
+            console.error('Failed to fetch applicant count', err);
         }
     };
 
@@ -237,7 +250,7 @@ export default function JobDetail() {
                         transition: 'all 0.3s'
                     }}
                 >
-                    <User size={18} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} /> Applicants ({applicants.length})
+                    <User size={18} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} /> Applicants ({applicantsCount})
                 </button>
                 <button
                     onClick={() => setActiveTab('social')}
@@ -339,17 +352,74 @@ export default function JobDetail() {
                             {applicants.map((cand) => (
                                 <div key={cand.id} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                                        <div>
-                                            <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '1.1rem' }}>{cand.full_name}</div>
-                                            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.3rem', fontSize: '0.9rem' }}>
-                                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-primary)' }}><Mail size={14} /> {cand.email}</span>
-                                                {cand.phone && <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}><Phone size={14} /> {cand.phone}</span>}
+                                        <div style={{ display: 'flex', gap: '1.5rem' }}>
+                                            {cand.ats_score !== null && (
+                                                <div style={{
+                                                    width: '64px', height: '64px', borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                                    background: cand.ats_score >= (job.shortlist_threshold || 70) ? 'rgba(16, 185, 129, 0.1)' : (cand.ats_score >= (job.review_threshold || 50) ? 'rgba(251, 191, 36, 0.1)' : 'rgba(239, 68, 68, 0.1)'),
+                                                    border: `1px solid ${cand.ats_score >= (job.shortlist_threshold || 70) ? 'rgba(16, 185, 129, 0.2)' : (cand.ats_score >= (job.review_threshold || 50) ? 'rgba(251, 191, 36, 0.2)' : 'rgba(239, 68, 68, 0.2)')}`
+                                                }}>
+                                                    <div style={{ fontSize: '1.4rem', fontWeight: '900', color: cand.ats_score >= (job.shortlist_threshold || 70) ? '#10b981' : (cand.ats_score >= (job.review_threshold || 50) ? '#fbbf24' : '#ef4444') }}>{Math.round(cand.ats_score)}</div>
+                                                    <div style={{ fontSize: '0.65rem', fontWeight: '800', opacity: 0.8, color: '#fff' }}>ATS</div>
+                                                </div>
+                                            )}
+                                            <div>
+                                                <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                    {cand.full_name}
+                                                    <span style={{
+                                                        fontSize: '0.7rem', padding: '0.2rem 0.6rem', borderRadius: '10px', textTransform: 'uppercase', fontWeight: '800',
+                                                        background: cand.status === 'shortlisted' ? 'rgba(16, 185, 129, 0.15)' : (cand.status === 'review' ? 'rgba(251, 191, 36, 0.15)' : 'rgba(239, 68, 68, 0.15)'),
+                                                        color: cand.status === 'shortlisted' ? '#10b981' : (cand.status === 'review' ? '#fbbf24' : '#ef4444'),
+                                                        border: `1px solid ${cand.status === 'shortlisted' ? 'rgba(16, 185, 129, 0.2)' : (cand.status === 'review' ? 'rgba(251, 191, 36, 0.2)' : 'rgba(239, 68, 68, 0.2)')}`
+                                                    }}>
+                                                        {cand.status}
+                                                    </span>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.3rem', fontSize: '0.9rem' }}>
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-primary)' }}><Mail size={14} /> {cand.email}</span>
+                                                    {cand.phone && <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}><Phone size={14} /> {cand.phone}</span>}
+                                                </div>
                                             </div>
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                                             Applied: {new Date(cand.applied_at).toLocaleDateString()}
                                         </div>
                                     </div>
+
+                                    {cand.ats_explanation && (
+                                        <div style={{ margin: '1rem 0', padding: '1.2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--accent-primary)', fontSize: '0.85rem', fontWeight: '700', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                                <Sparkles size={16} /> AI Match Analysis
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                                <div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '700', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        <CheckCircle size={14} /> MATCHED KEYWORDS
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                                                        {cand.ats_explanation.matched_skills.map(s => (
+                                                            <span key={s} style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '4px' }}>{s}</span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: '700', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        <X size={14} /> MISSING KEYWORDS
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                                                        {cand.ats_explanation.missing_skills.map(s => (
+                                                            <span key={s} style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '4px' }}>{s}</span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '2rem', fontSize: '0.85rem' }}>
+                                                <span style={{ color: 'var(--text-secondary)' }}>Exp: <strong style={{ color: '#fff' }}>{cand.ats_explanation.experience_detected}</strong></span>
+                                                <span style={{ color: 'var(--text-secondary)' }}>Edu: <strong style={{ color: '#fff' }}>{cand.ats_explanation.education_detected.join(', ') || 'None found'}</strong></span>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {cand.linkedin_profile && (
                                         <div style={{ marginBottom: '1rem' }}>
                                             <a href={cand.linkedin_profile} target="_blank" rel="noreferrer" style={{ fontSize: '0.85rem', color: '#0077b5', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -358,27 +428,30 @@ export default function JobDetail() {
                                         </div>
                                     )}
                                     {cand.resume_base64 && (
-                                        <div style={{ padding: '1.5rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                <div style={{ padding: '0.8rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px' }}><FileText size={24} color="var(--accent-primary)" /></div>
+                                                <div style={{ padding: '0.8rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px' }}><FileText size={20} color="var(--accent-primary)" /></div>
                                                 <div>
-                                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.95rem' }}>{cand.resume_filename}</div>
+                                                    <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.9rem' }}>{cand.resume_filename}</div>
                                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Resume Uploaded</div>
                                                 </div>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.8rem' }}>
-                                                <button onClick={() => setPreviewCandidate(cand)} className="btn btn-secondary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.6rem' }}>
+                                                <button onClick={() => setPreviewCandidate(cand)} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
                                                     Quick Look
                                                 </button>
-                                                <button onClick={() => handleDownload(cand)} className="btn btn-secondary" style={{ padding: '0.6rem 0.6rem', color: 'var(--success)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
-                                                    <Download size={18} />
+                                                <button onClick={() => handleDownload(cand)} className="btn btn-secondary" style={{ padding: '0.5rem 0.5rem', color: 'var(--success)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
+                                                    <Download size={16} />
                                                 </button>
                                             </div>
                                         </div>
                                     )}
+
                                     {cand.resume_text && (
-                                        <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', fontSize: '1rem', color: 'var(--text-secondary)', whiteSpace: 'pre-line', maxHeight: '200px', overflowY: 'auto' }}>
-                                            <strong style={{ color: 'var(--text-primary)', display: 'block', marginBottom: '0.5rem' }}>Cover Note:</strong>
+                                        <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px dotted rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '1rem', color: 'var(--text-secondary)', whiteSpace: 'pre-line' }}>
+                                            <strong style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                                <FileText size={16} color="#38bdf8" /> Cover Letter
+                                            </strong>
                                             {cand.resume_text}
                                         </div>
                                     )}

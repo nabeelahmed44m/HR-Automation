@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { Save, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Save, AlertCircle, ArrowLeft, Settings as SettingsIcon } from 'lucide-react';
 import api from '../api';
 
 export default function EditJob() {
@@ -20,7 +20,13 @@ export default function EditJob() {
         status: '',
         publish_destination: 'feed',
         tags: '',
-        image_url: ''
+        image_url: '',
+        skill_weight: 40,
+        experience_weight: 30,
+        education_weight: 10,
+        keyword_weight: 20,
+        shortlist_threshold: 70,
+        review_threshold: 50
     });
 
     useEffect(() => {
@@ -41,7 +47,13 @@ export default function EditJob() {
                 status: data.status,
                 publish_destination: data.publish_destination || 'feed',
                 tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || ''),
-                image_url: data.image_url || ''
+                image_url: data.image_url || '',
+                skill_weight: data.skill_weight || 40,
+                experience_weight: data.experience_weight || 30,
+                education_weight: data.education_weight || 10,
+                keyword_weight: data.keyword_weight || 20,
+                shortlist_threshold: data.shortlist_threshold || 70,
+                review_threshold: data.review_threshold || 50
             });
         } catch (err) {
             console.error(err);
@@ -169,6 +181,46 @@ export default function EditJob() {
                         <div className="form-group" style={{ gridColumn: 'span 2' }}>
                             <label>Tags (Comma separated)</label>
                             <input type="text" name="tags" className="form-control" value={formData.tags} onChange={handleChange} placeholder="Python, Backend, Remote" />
+                        </div>
+
+                        {/* --- ATS SCORING CONFIGURATION --- */}
+                        <div style={{ gridColumn: 'span 2', marginTop: '2.5rem', marginBottom: '1.5rem', padding: '1.5rem', background: 'rgba(56, 189, 248, 0.05)', borderRadius: '15px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
+                            <h4 style={{ marginBottom: '1rem', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <SettingsIcon size={18} /> ATS Resume Scoring Engine (NLP Calibration)
+                            </h4>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Configure how the AI should rank incoming resumes based on the job description.</p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '700' }}>Skill Weight (%)</label>
+                                    <input type="number" name="skill_weight" className="form-control" value={formData.skill_weight} onChange={handleChange} min={0} max={100} />
+                                </div>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '700' }}>Exp Weight (%)</label>
+                                    <input type="number" name="experience_weight" className="form-control" value={formData.experience_weight} onChange={handleChange} min={0} max={100} />
+                                </div>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '700' }}>Edu Weight (%)</label>
+                                    <input type="number" name="education_weight" className="form-control" value={formData.education_weight} onChange={handleChange} min={0} max={100} />
+                                </div>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '700' }}>Keyword Density (%)</label>
+                                    <input type="number" name="keyword_weight" className="form-control" value={formData.keyword_weight} onChange={handleChange} min={0} max={100} />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '700' }}>Shortlist Threshold (Scale 0-100)</label>
+                                    <input type="number" name="shortlist_threshold" className="form-control" value={formData.shortlist_threshold} onChange={handleChange} min={0} max={100} />
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--success)' }}>Scores above this will be Auto-Shortlisted</span>
+                                </div>
+                                <div className="form-group">
+                                    <label style={{ fontSize: '0.75rem', fontWeight: '700' }}>Review Threshold (Scale 0-100)</label>
+                                    <input type="number" name="review_threshold" className="form-control" value={formData.review_threshold} onChange={handleChange} min={0} max={100} />
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--warning)' }}>Scores below this will be Rejected</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

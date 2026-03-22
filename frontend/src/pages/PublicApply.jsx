@@ -119,6 +119,7 @@ export default function PublicApply() {
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap', color: '#64748b', fontSize: '1.25rem', fontWeight: '600' }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}><MapPin size={24} color="#38bdf8" /> {job.location}</span>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}><Star size={24} color="#fbbf24" /> {job.job_type}</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}><Clock size={24} color="#a855f7" /> {job.experience_level}</span>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}><Building2 size={24} color="#f472b6" /> TEAM {ownerName}</span>
                             </div>
                         </header>

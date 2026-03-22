@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
 from uuid import UUID
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any
 
 class CandidateBase(BaseModel):
     full_name: str
@@ -19,6 +19,8 @@ class CandidateResponse(CandidateBase):
     id: UUID
     job_id: UUID
     status: str
+    ats_score: Optional[float] = None
+    ats_explanation: Optional[Dict[str, Any]] = None
     applied_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

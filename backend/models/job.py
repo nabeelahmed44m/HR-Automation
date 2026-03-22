@@ -29,5 +29,14 @@ class Job(Base):
     publish_destination = Column(Enum(PublishDestination), nullable=True, default=PublishDestination.feed)
     image_base64 = Column(Text, nullable=True)
     tags = Column(String, nullable=True)
+    # ATS Scoring Configuration (0-100 weights and thresholds)
+    skill_weight = Column(Numeric, nullable=True, default=40)
+    experience_weight = Column(Numeric, nullable=True, default=30)
+    education_weight = Column(Numeric, nullable=True, default=10)
+    keyword_weight = Column(Numeric, nullable=True, default=20)
+    
+    shortlist_threshold = Column(Numeric, nullable=True, default=70) # > 70 shortlist
+    review_threshold = Column(Numeric, nullable=True, default=50) # 50-70 review
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())

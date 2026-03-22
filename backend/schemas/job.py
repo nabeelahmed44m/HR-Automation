@@ -18,6 +18,13 @@ class JobBase(BaseModel):
     publish_destination: Optional[PublishDestination] = Field(default=PublishDestination.feed, description="Feed is available now. Job page is an incoming feature.")
     image_url: Optional[str] = None
     tags: Optional[List[str]] = Field(default_factory=list)
+    # ATS Calibration
+    skill_weight: Optional[int] = 40
+    experience_weight: Optional[int] = 30
+    education_weight: Optional[int] = 10
+    keyword_weight: Optional[int] = 20
+    shortlist_threshold: Optional[int] = 70
+    review_threshold: Optional[int] = 50
 
     @field_validator('tags', mode='before')
     @classmethod
