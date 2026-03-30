@@ -8,10 +8,13 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Settings from './pages/Settings';
 import PublicApply from './pages/PublicApply';
+import InterviewPage from './pages/InterviewPage';
 
 function Layout({ children }) {
   const location = useLocation();
-  const isPublicPage = ['/login', '/register'].includes(location.pathname) || location.pathname.startsWith('/apply/');
+  const isPublicPage = ['/login', '/register'].includes(location.pathname) ||
+    location.pathname.startsWith('/apply/') ||
+    location.pathname.startsWith('/interview/');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -85,6 +88,7 @@ export default function App() {
           <Route path="/job/:id" element={<ProtectedRoute><JobDetail /></ProtectedRoute>} />
           <Route path="/job/:id/edit" element={<ProtectedRoute><EditJob /></ProtectedRoute>} />
           <Route path="/apply/:id" element={<PublicApply />} />
+          <Route path="/interview/:sessionId" element={<InterviewPage />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -70,7 +70,29 @@ class JobService:
     async def update_job(self, id: UUID, job_update: JobUpdate, owner_id: UUID) -> Job:
         job = await self.get_job(id, owner_id)
         update_data = job_update.model_dump(exclude_unset=True)
+        
         try:
+            # 1. Handle Image Fetching from URL
+            image_url = update_data.pop("image_url", None)
+            if image_url:
+                try:
+                    import httpx
+                    import base64
+                    async with httpx.AsyncClient() as client:
+                        response = await client.get(image_url)
+                        if response.status_code == 200:
+                            content_type = response.headers.get("content-type", "image/png")
+                            base64_data = base64.b64encode(response.content).decode("utf-8")
+                            update_data["image_base64"] = f"data:{content_type};base64,{base64_data}"
+                            logger.info(f"Successfully updated image from {image_url}")
+                except Exception as img_err:
+                    logger.warning(f"Failed to fetch image from {image_url}: {str(img_err)}")
+
+            # 2. Handle Tags formatting (List -> String)
+            tags_list = update_data.pop("tags", None)
+            if tags_list is not None:
+                update_data["tags"] = ",".join(tags_list)
+
             updated_job = await self.repository.update(job, update_data)
             await self.session.commit()
             logger.info(f"Updated job {id} for user {owner_id}")

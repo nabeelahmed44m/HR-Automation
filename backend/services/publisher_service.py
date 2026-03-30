@@ -8,6 +8,7 @@ from repositories.publish import PublicationRepository
 from models.job import Job
 from models.user import User
 from models.publish import Publication, PublishStatus, PublishDestination
+from models.screening import JobScreeningQuestion
 from .linkedin_publisher import LinkedInPublisher
 
 from repositories.user import UserRepository

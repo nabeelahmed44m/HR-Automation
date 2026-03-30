@@ -50,6 +50,13 @@ class JobUpdate(BaseModel):
     publish_destination: Optional[PublishDestination] = None
     image_url: Optional[str] = None
     tags: Optional[List[str]] = None
+    # ATS Calibration
+    skill_weight: Optional[int] = None
+    experience_weight: Optional[int] = None
+    education_weight: Optional[int] = None
+    keyword_weight: Optional[int] = None
+    shortlist_threshold: Optional[int] = None
+    review_threshold: Optional[int] = None
 
 class JobResponse(JobBase):
     id: UUID

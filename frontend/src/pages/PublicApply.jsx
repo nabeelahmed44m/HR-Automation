@@ -212,7 +212,7 @@ export default function PublicApply() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
                                     <div className="field-group">
                                         <label className="field-label">PHONE NUMBER</label>
-                                        <input type="tel" className="input-premium" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+1 (555) 000-0000" />
+                                        <input type="tel" className="input-premium" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+923420009241 (include country code)" />
                                     </div>
                                     <div className="field-group">
                                         <label className="field-label">LINKEDIN URL</label>

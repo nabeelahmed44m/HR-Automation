@@ -25,6 +25,8 @@ from models.job import Job
 from models.publish import Publication
 from models.user import User
 from models.candidate import Candidate
+from models.screening import JobScreeningQuestion
+from models.interview import InterviewSession
 from core.config import settings
 
 # add your model's MetaData object here

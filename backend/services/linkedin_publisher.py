@@ -67,12 +67,30 @@ class LinkedInPublisher:
                     f"{formatted_tags}"
                 )
                 
-                logger.info("Opening post composer on feed...")
-                await asyncio.sleep(4)  # Let feed stabilize
-                
-                # Click 'Start a post'
-                await page.wait_for_selector('text="Start a post"', timeout=20000)
-                await page.click('text="Start a post"')
+                logger.info("Looking for 'Start a post' button...")
+                # LinkedIn frequently changes their UI — try multiple known selectors
+                start_post_selectors = [
+                    'text="Start a post"',
+                    'text="Start a post, try a video or a photo"',
+                    '[placeholder="Start a post"]',
+                    'button.share-box-feed-entry__trigger',
+                    '[data-control-name="share.sharebox_trigger"]',
+                    'div.share-box-feed-entry__top-bar button',
+                    '.share-box-feed-entry__closed-share-box',
+                ]
+                clicked = False
+                for sel in start_post_selectors:
+                    try:
+                        await page.wait_for_selector(sel, timeout=5000)
+                        await page.click(sel)
+                        clicked = True
+                        logger.info(f"Clicked start-post with selector: {sel}")
+                        break
+                    except Exception:
+                        continue
+                if not clicked:
+                    await page.screenshot(path=f"linkedin_debug_{job_data['id']}_no_startpost.png")
+                    raise Exception("Could not find 'Start a post' button. LinkedIn UI may have changed again.")
                 
                 # 2. Handle Image Upload if base64 provided
                 img_b64 = job_data.get('image_base64')
@@ -120,13 +138,28 @@ class LinkedInPublisher:
                         logger.warning(f"Failed to upload image: {e}")
 
                 logger.info("Writing post content...")
-                # Increase timeout to 25s because LinkedIn's modal can be extremely slow to load
-                await page.wait_for_selector('div[role="textbox"]', timeout=25000)
+                # LinkedIn frequently changes their textbox structure — try multiple selectors
+                textbox_selectors = [
+                    'div[role="textbox"]',
+                    '.ql-editor[contenteditable="true"]',
+                    '.mentions-texteditor__content',
+                    'div.editor-container div[contenteditable="true"]',
+                    '[data-placeholder]',
+                ]
+                textbox_found = False
+                for sel in textbox_selectors:
+                    try:
+                        await page.wait_for_selector(sel, timeout=10000)
+                        await page.click(sel)
+                        textbox_found = True
+                        logger.info(f"Found textbox with selector: {sel}")
+                        break
+                    except Exception:
+                        continue
+                if not textbox_found:
+                    await page.screenshot(path=f"linkedin_debug_{job_data['id']}_no_textbox.png")
+                    raise Exception("Could not find post textbox. LinkedIn UI may have changed.")
                 
-                # LinkedIn uses a complex React text editor (Draft.js). 
-                # .fill() often sets the text but fails to trigger the 'Post' button to turn blue.
-                # Must simulate human typing!
-                await page.click('div[role="textbox"]')
                 await page.keyboard.type(post_content, delay=5)
                 await asyncio.sleep(2)
                 
